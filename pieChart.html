@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>statistics</title>
+        <style type="text/css">
+        .putIn{float: left;width: 400px;}
+        #canvas{float: left;}
+        </style>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
+		<script type="text/javascript">
+		$(function(){
+		    function rads(x){return x*Math.PI/180;}
+		    var getData=function(){
+		    	 return $(':number').val();
+		    }
+		    var getLabels=function (){
+		    	return $(':text').val();
+		    }
+		    var getColors=function (){
+		    	return $(':color').val();
+		    }
+		    function validate(){
+		    	var $input=$(':input');
+		    	var flag=false;
+		    	for (var i = 0; i < $input.length; i++) {
+		    		if(($input.eq(i).attr('required')=='required')&&($input.eq(i).val()=='')){
+		    			$('.error').html('请输入完整的数据');
+		    			return false;
+		    		}
+		    	}
+		    	return true;
+		    }
+		    $(".add").click(function(){
+		    	if (validate()) {
+		    		var dataArea=$(".dataArea:eq(0)").html();
+		    		$(dataArea).insertBefore($(".add"));
+		    		$('.error').html('');
+		    	};
+		    });
+
+	      	var canvas=document.getElementById("canvas");
+		  	var ctx=canvas.getContext("2d");
+
+		    function pieChart(labels,data,colors){
+		    	//累积data值，分别计算每个数据的百分比以确定每个数据的角度
+		    	var total=0;
+		    	for (var i = 0; i < data.length; i++) {
+		    		total+=data[i];
+		    	}
+		    	var angles=[];
+		    	var startAngle=0;
+		    	var endAngle=0;
+		    	var rx=250,ry=250,r=200;
+		    	var fx=rx+250,fy=100;
+		    	for (var i = 0; i < data.length; i++) {
+		    		angles[i]=data[i]/total*360;
+		    		endAngle=startAngle+angles[i];
+				    ctx.beginPath();
+				    ctx.moveTo(rx,ry);
+		    		ctx.arc(rx,ry,r,rads(startAngle),rads(endAngle),false);
+		    		ctx.closePath();
+		    		ctx.fillStyle=colors[i];
+		    		ctx.fillRect(fx,fy+i*30,20,20);	    		
+		    		ctx.lineWidth=3;
+		    		startAngle=endAngle;
+				    ctx.fill();
+				    ctx.stroke();
+				    ctx.fillStyle="#333";
+			        ctx.font= '18px 微软雅黑';
+			        ctx.fillText(labels[i],fx+30,fy+17+i*30);
+		    	}
+		    }
+			$(".pieChart").click(pieChart(getLabels,getData,getColors));
+		});
+
+        </script>
+    </head>
+    <body>
+    <div class="putIn">
+    	<div class="dataArea">
+	    	<input type="text" name="label" autofocus="autofocus" placeholder="labels"  required="required" autocomplete="off"/>
+	    	<input type="number" name="data"  placeholder="0"  required="required" min="0" autocomplete="off"/>
+	    	<input type="color" value="#cccccc" />
+    	</div>
+	    <button class="add">添加</button>
+	    <button class="pieChart">饼状图</button>
+	    <div class="error"></div>
+    </div>
+        <canvas id="canvas" width="1000" height="1000"></canvas>        
+    </body>
+</html>
